@@ -17,7 +17,7 @@ const server = http.createServer((req, res) => {
   res.write("</html>")
   res.end()
   }
-  if(url==="/home"){
+  if(url==="/node"){
   res.setHeader('Content-Type', 'text/html');
   res.write("<html>")
   res.write("<head><title>my first page</title></head>")
@@ -29,4 +29,6 @@ const server = http.createServer((req, res) => {
 });
 
 const port = 3001
-server.listen(port)
+server.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  })
