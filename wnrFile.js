@@ -16,25 +16,22 @@ const server = http.createServer((req, res) => {
       const messages = data ? data.split('\n') : [];
       const latestMessage = messages[messages.length - 2]; // Get the latest message
       
-      res.write("<html>");
-      res.write("<head><title>Welcome Home</title></head>");
-      res.write("<body>");
+      res.write(`
+        <html>
+          <head>
+            <title>Welcome Home</title>
+          </head>
+          <body>
+            ${latestMessage ? `<p>${latestMessage}</p>` : "<p>No messages yet</p>"}
+            <h2>Add Message:</h2>
+            <form action="/message" method="POST">
+              <input type="text" name="message"><br><br>
+              <button type="submit">Submit</button>
+            </form>
+          </body>
+        </html>
+      `);
       
-      //res.write("<h2>Latest Message:</h2>");
-      if (latestMessage) {
-        res.write(`<p>${latestMessage}</p>`);
-      } else {
-        res.write("<p>No messages yet</p>");
-      }
-      
-      res.write("<h2>Add Message:</h2>");
-      res.write("<form action=\"/message\" method=\"POST\">");
-      res.write("<input type=\"text\" name=\"message\"><br><br>");
-      res.write("<button type=\"submit\">Submit</button>");
-      res.write("</form>");
-      
-      res.write("</body>");
-      res.write("</html>");
       res.end();
     });
   }
@@ -64,10 +61,16 @@ const server = http.createServer((req, res) => {
   }
   else {
     res.statusCode = 404;
-    res.write("<html>");
-    res.write("<head><title>Page Not Found</title></head>");
-    res.write("<body><p>404 - Page Not Found</p></body>");
-    res.write("</html>");
+    res.write(`
+      <html>
+        <head>
+          <title>Page Not Found</title>
+        </head>
+        <body>
+          <p>404 - Page Not Found</p>
+        </body>
+      </html>
+    `);
     res.end();
   }
 });
