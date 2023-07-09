@@ -51,14 +51,46 @@
 
           const orderElement = document.createElement("div");
           orderElement.innerHTML = `
-              <h2>Table ${order.table_no} - Order Details:</h2>
-              <p>Dish: ${order.dish}</p>
-              <p>Price: $${order.price}</p>
-              <button class="deleteBtn" data-id="${order.id}">Delete</button>
-            `;
+            <h2>Table ${order.table_no} - Order Details:</h2>
+            <p>Dish: ${order.dish}</p>
+            <p>Price: $${order.price}</p>
+            <button class="editBtn" data-id="${order.id}">Edit</button>
+            <button class="deleteBtn" data-id="${order.id}">Delete</button>
+          `;
 
           tableElement.appendChild(orderElement);
           orderDetailsElement.appendChild(tableElement);
+        });
+
+        const editButtons = document.getElementsByClassName("editBtn");
+        Array.from(editButtons).forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const orderId = btn.dataset.id;
+
+            // Retrieve order details for editing
+            fetch(`http://localhost:3000/orders/${orderId}`)
+              .then((response) => {
+                if (response.ok) {
+                  return response.json();
+                } else {
+                  throw new Error("Failed to retrieve order details");
+                }
+              })
+              .then((data) => {
+                const { dish, price, table_no } = data;
+                const dishNameInput = document.getElementById("dishName");
+                const dishPriceInput = document.getElementById("dishPrice");
+                const tableNoInput = document.getElementById("tableNo");
+
+                dishNameInput.value = dish;
+                dishPriceInput.value = price;
+                tableNoInput.value = table_no;
+              })
+              .catch((error) => {
+                console.error("Error retrieving order details:", error);
+                alert("Failed to retrieve order details for editing");
+              });
+          });
         });
 
         const deleteButtons = document.getElementsByClassName("deleteBtn");
@@ -72,7 +104,7 @@
               .then((response) => response.json())
               .then((data) => {
                 console.log(data);
-                tableElement = document.getElementById(`table-${orderId}`);
+                const tableElement = document.getElementById(`table-${orderId}`);
                 tableElement.remove();
                 alert("Order deleted successfully");
               })
@@ -97,49 +129,47 @@
           });
       });
 
-      document
-        .getElementById("orderForm")
-        .addEventListener("submit", function (event) {
-          event.preventDefault();
+      document.getElementById("orderForm").addEventListener("submit", function (event) {
+        event.preventDefault();
 
-          const dishName = document.getElementById("dishName").value;
-          const dishPrice = document.getElementById("dishPrice").value;
-          const tableNo = document.getElementById("tableNo").value;
+        const dishName = document.getElementById("dishName").value;
+        const dishPrice = document.getElementById("dishPrice").value;
+        const tableNo = document.getElementById("tableNo").value;
 
-          const order = {
-            dish: dishName,
-            price: dishPrice,
-            tableNo: tableNo,
-          };
+        const order = {
+          dish: dishName,
+          price: dishPrice,
+          tableNo: tableNo,
+        };
 
-          fetch("http://localhost:3000/order", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(order),
+        fetch("http://localhost:3000/order", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(order),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            fetch("http://localhost:3000/orders")
+              .then((response) => response.json())
+              .then((data) => {
+                console.log(data);
+                displayOrders(data);
+              })
+              .catch((error) => {
+                console.error("Error retrieving orders:", error);
+                alert("Failed to retrieve orders");
+              });
+
+            alert("Order stored successfully");
           })
-            .then((response) => response.json())
-            .then((data) => {
-              console.log(data);
-              fetch("http://localhost:3000/orders")
-                .then((response) => response.json())
-                .then((data) => {
-                  console.log(data);
-                  displayOrders(data);
-                })
-                .catch((error) => {
-                  console.error("Error retrieving orders:", error);
-                  alert("Failed to retrieve orders");
-                });
-
-              alert("Order stored successfully");
-            })
-            .catch((error) => {
-              console.error("Error storing order:", error);
-              alert("Failed to store order");
-            });
-        });
+          .catch((error) => {
+            console.error("Error storing order:", error);
+            alert("Failed to store order");
+          });
+      });
     </script>
   </body>
 </html>
